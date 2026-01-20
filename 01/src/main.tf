@@ -26,7 +26,7 @@ resource "docker_image" "nginx_image" {
 }
 
 resource "docker_container" "nginx" {
-  image = docker_image.nginx.image_id
+  image = docker_image.nginx_image.image_id
   name  = "example_${random_password.random_string.result}"
 
   ports {
