@@ -19,7 +19,7 @@ resource "random_password" "random_string" {
   min_numeric = 1
 }
 
-/*
+
 resource "docker_image" {
   name         = "nginx:latest"
   keep_locally = true
@@ -34,4 +34,4 @@ resource "docker_container" "1nginx" {
     external = 9090
   }
 }
-*/
+
