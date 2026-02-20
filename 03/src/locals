@@ -1,0 +1,28 @@
+locals {
+  each_vm_map = {
+    for vm in var.each_vm : vm.vm_name => vm
+  }
+
+  ssh_public_key = coalesce(
+    try(file(pathexpand(var.ssh_public_key_path)), null),
+    var.fallback_ssh_public_key
+  )
+
+  metadata = {
+    serial-port-enable = "1"
+    ssh-keys           = "ubuntu:${local.ssh_public_key}"
+  }
+
+  all_count_foreach_vms = concat(
+    [for vm in yandex_compute_instance.web : {
+      name = vm.name
+      id   = vm.id
+      fqdn = vm.fqdn
+    }],
+    [for vm in values(yandex_compute_instance.db) : {
+      name = vm.name
+      id   = vm.id
+      fqdn = vm.fqdn
+    }]
+  )
+}

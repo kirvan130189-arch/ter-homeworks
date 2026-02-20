@@ -1,0 +1,8 @@
+output "vms_count_for_each" {
+  description = "List of VMs from count and for_each resources"
+  value       = local.all_count_foreach_vms
+}
+
+output "inventory_file" {
+  value = local_file.ansible_inventory.filename
+}

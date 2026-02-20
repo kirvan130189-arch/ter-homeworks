@@ -1,5 +1,4 @@
-###cloud vars
-
+### Cloud vars
 
 variable "cloud_id" {
   type        = string
@@ -11,28 +10,108 @@ variable "folder_id" {
   description = "https://cloud.yandex.ru/docs/resource-manager/operations/folder/get-id"
 }
 
+variable "service_account_key_file" {
+  type        = string
+  default     = "~/.authorized_key.json"
+  description = "Path to authorized service account key json"
+}
+
 variable "default_zone" {
   type        = string
   default     = "ru-central1-a"
   description = "https://cloud.yandex.ru/docs/overview/concepts/geo-scope"
 }
-variable "default_cidr" {
-  type        = list(string)
-  default     = ["10.0.1.0/24"]
-  description = "https://cloud.yandex.ru/docs/vpc/operations/subnet-create"
-}
 
 variable "vpc_name" {
   type        = string
   default     = "develop"
-  description = "VPC network & subnet name"
+  description = "VPC network name"
 }
 
+### SSH vars
 
-###ssh vars
-
-variable "vms_ssh_root_key" {
+variable "vms_ssh_public_root_key" {
   type        = string
-  default     = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2bFomo0QnSKhW6mQNo904PDY4UUlNKyx29LHGn3zgsxPHkfn46k0SkEqvkZX6cuY8HTGSpEwgu8db3BfrYkMpJLdDg8QAyQPbWrdNNT09k6vtldB51j9Kij32/JAnyJp8A6bn+jj/ge6ZboYVQ7v0ZdUIvP67SqGRpQAK+99M0cdJRVap0dzTwVSoGCsBNR1rUtzNj7Yr/C/QRuD0LlIG7A3Kgmt5tH32z0TXRnvBV1oHjS4iG8LzYXKSJqobXyHSwbhoWYYRyeTAHHY29gbU/9B+gfRsLdIPg0Vr35w14FmzuWHBRHIoRbgFHgL0OEGfDU0ynQEtgD2R3uJTNIXj"
-  description = "ssh-keygen -t ed25519"
+  description = "Public SSH key for ubuntu user"
 }
+
+### Common VM metadata (task 6)
+
+variable "metadata" {
+  type = map(string)
+  default = {
+    serial-port-enable = "1"
+  }
+  description = "Common metadata for all VMs"
+}
+
+### VM resources map (task 6)
+
+variable "vms_resources" {
+  type = map(object({
+    cores         = number
+    memory        = number
+    core_fraction = number
+    disk_size     = number
+    disk_type     = string
+  }))
+
+  default = {
+    web = {
+      cores         = 2
+      memory        = 1
+      core_fraction = 5
+      disk_size     = 10
+      disk_type     = "network-hdd"
+    }
+    db = {
+      cores         = 2
+      memory        = 2
+      core_fraction = 20
+      disk_size     = 10
+      disk_type     = "network-hdd"
+    }
+  }
+}
+
+### Enable/disable public IP on both VMs (task 9*)
+
+variable "vm_use_public_ip" {
+  type        = bool
+  default     = false
+  description = "Set false to test NAT gateway scenario"
+}
+
+### Task 8* type variable
+
+variable "test" {
+  type = list(map(tuple([string, string])))
+  default = [
+    {
+      dev1 = [
+        "ssh -o 'StrictHostKeyChecking=no' ubuntu@62.84.124.117",
+        "10.0.1.7",
+      ]
+    },
+    {
+      dev2 = [
+        "ssh -o 'StrictHostKeyChecking=no' ubuntu@84.252.140.88",
+        "10.0.2.29",
+      ]
+    },
+    {
+      prod1 = [
+        "ssh -o 'StrictHostKeyChecking=no' ubuntu@51.250.2.101",
+        "10.0.1.30",
+      ]
+    },
+  ]
+}
+
+# Task 6: deprecated per-VM resource variables (commented as no longer used)
+# variable "vm_web_cores" {}
+# variable "vm_web_memory" {}
+# variable "vm_web_core_fraction" {}
+# variable "vm_db_cores" {}
+# variable "vm_db_memory" {}
+# variable "vm_db_core_fraction" {}
