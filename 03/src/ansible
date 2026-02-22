@@ -1,12 +1,18 @@
-# Local .terraform directories and files
-**/.terraform/*
-.terraform*
+resource "local_file" "ansible_inventory" {
+  content = templatefile("${path.module}/hosts.tftpl", {
+    webservers = yandex_compute_instance.web
+    databases  = values(yandex_compute_instance.db)
+    storage    = [yandex_compute_instance.storage]
+  })
 
-!.terraformrc
+  filename = "${abspath(path.module)}/hosts.ini"
+}
 
-# .tfstate files
-*.tfstate
-*.tfstate.*
+resource "null_resource" "ansible_playbook" {
+  count      = var.run_ansible_playbook ? 1 : 0
+  depends_on = [local_file.ansible_inventory]
 
-# own secret vars store.
-personal.auto.tfvars
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${abspath(path.module)}/hosts.ini ${abspath(path.module)}/test.yml"
+  }
+}
